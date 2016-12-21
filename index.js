@@ -7,7 +7,7 @@ var fs         = require('fs-extra');
 var fsp        = require('fs-promise');
 var path       = require('path');
 var move       = Promise.denodeify(fs.move);
-var targz      = require('tar.gz');
+var AdmZip     = require('adm-zip');
 
 var AWS = require('aws-sdk');
 
@@ -108,21 +108,24 @@ module.exports = {
       _pack: function() {
         var distDir = this.readConfig('distDir');
         var archivePath = this.readConfig('archivePath');
+        var zip = new AdmZip()
 
         fs.mkdirsSync(archivePath);
 
         var archiveName = this._buildArchiveName();
         var fileName = path.join(archivePath, archiveName);
 
-        this.log('saving tarball of ' + distDir + ' to ' + fileName);
+        this.log('saving zip of ' + distDir + ' to ' + fileName);
 
-        return targz().compress(distDir, fileName);
+        zip.addLocalFolder(distDir);
+
+        return Promise.resolve(zip.writeZip(fileName))
       },
 
       _buildArchiveName: function() {
         var distDirName = this.readConfig('distDir').split('/').slice(-1);
         var revisionKey = this.readConfig('revisionKey');
-        return `${distDirName}-${revisionKey}.tar`;
+        return `${distDirName}-${revisionKey}.zip`;
       },
 
       _errorMessage: function(error) {

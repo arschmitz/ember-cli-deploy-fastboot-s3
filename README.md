@@ -39,7 +39,7 @@ $ ember install ember-cli-deploy-fastboot-s3
 - Place the following configuration into `config/deploy.js`
 
 ```javascript
-ENV.s3 = {
+ENV['fastboot-s3`] = {
   accessKeyId: '<your-aws-access-key>',
   secretAccessKey: '<your-aws-secret>',
   bucket: '<your-s3-bucket>',

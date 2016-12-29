@@ -114,14 +114,14 @@ module.exports = {
 
           fs.mkdirsSync(archivePath);
 
-          var output = fs.createWriteStream(archiveName);
+          var output = fs.createWriteStream(fileName);
           var zip = archiver('zip', {
               store: true // Sets the compression method to STORE.
           });
 
           // listen for all archive data to be written
           output.on('close', function() {
-            console.log(archive.pointer() + ' total bytes');
+            console.log(zip.pointer() + ' total bytes');
             console.log('archiver has been finalized and the output file descriptor has closed.');
           });
 
@@ -130,7 +130,7 @@ module.exports = {
             throw err;
           });
 
-          zip.on('end', function() {
+          output.on('close', function() {
             resolve();
           })
 

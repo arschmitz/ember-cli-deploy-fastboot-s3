@@ -7,7 +7,7 @@ var fs         = require('fs-extra');
 var fsp        = require('fs-promise');
 var path       = require('path');
 var move       = Promise.denodeify(fs.move);
-var AdmZip     = require('adm-zip');
+var archiver     = require('archiver');
 
 var AWS = require('aws-sdk');
 
@@ -106,20 +106,41 @@ module.exports = {
       },
 
       _pack: function() {
-        var distDir = this.readConfig('distDir');
-        var archivePath = this.readConfig('archivePath');
-        var zip = new AdmZip()
+        return new Promise((resolve, reject) => {
+          var distDir = this.readConfig('distDir');
+          var archivePath = this.readConfig('archivePath');
+          var archiveName = this._buildArchiveName();
+          var fileName = path.join(archivePath, archiveName);
 
-        fs.mkdirsSync(archivePath);
+          fs.mkdirsSync(archivePath);
 
-        var archiveName = this._buildArchiveName();
-        var fileName = path.join(archivePath, archiveName);
+          var output = fs.createWriteStream(archiveName);
+          var zip = archiver('zip', {
+              store: true // Sets the compression method to STORE.
+          });
 
-        this.log('saving zip of ' + distDir + ' to ' + fileName);
+          // listen for all archive data to be written
+          output.on('close', function() {
+            console.log(archive.pointer() + ' total bytes');
+            console.log('archiver has been finalized and the output file descriptor has closed.');
+          });
 
-        zip.addLocalFolder(distDir);
+          // good practice to catch this error explicitly
+          zip.on('error', function(err) {
+            throw err;
+          });
 
-        return Promise.resolve(zip.writeZip(fileName))
+          zip.on('end', function() {
+            resolve();
+          })
+
+          // pipe archive data to the file
+          zip.pipe(output);
+
+          this.log('saving zip of ' + distDir + ' to ' + fileName);
+
+          zip.directory(distDir);
+        })
       },
 
       _buildArchiveName: function() {

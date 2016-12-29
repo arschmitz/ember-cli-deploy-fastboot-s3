@@ -120,9 +120,8 @@ module.exports = {
           });
 
           // listen for all archive data to be written
-          output.on('close', function() {
-            console.log(zip.pointer() + ' total bytes');
-            console.log('archiver has been finalized and the output file descriptor has closed.');
+          output.on('close', () => {
+            resolve();
           });
 
           // good practice to catch this error explicitly
@@ -130,16 +129,12 @@ module.exports = {
             throw err;
           });
 
-          output.on('close', function() {
-            resolve();
-          })
-
           // pipe archive data to the file
           zip.pipe(output);
 
           this.log('saving zip of ' + distDir + ' to ' + fileName);
 
-          zip.directory(distDir);
+          zip.directory(distDir, 'deploy-dist');
           zip.finalize()
         })
       },

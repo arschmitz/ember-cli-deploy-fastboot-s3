@@ -140,6 +140,7 @@ module.exports = {
           this.log('saving zip of ' + distDir + ' to ' + fileName);
 
           zip.directory(distDir);
+          zip.finalize()
         })
       },
 

@@ -2,7 +2,7 @@
 'use strict';
 
 var BasePlugin = require('ember-cli-deploy-plugin');
-var Promise    = require('ember-cli/lib/ext/promise');
+var Promise    = require('rsvp');
 var fs         = require('fs-extra');
 var fsp        = require('fs-promise');
 var path       = require('path');
